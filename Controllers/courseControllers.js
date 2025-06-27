@@ -7,10 +7,21 @@ const HandleCreateCourse = async (req, res) => {
     try {
 
         const { courseName, courseImage, courseDescription, courseDuration, courseLevel } = req.body;
-
-        if(!courseName || !courseDescription || !courseDuration || !courseLevel) {
-            return res.status(400).json({ message: 'All fields are required' });
+         
+        if(!courseName){
+            return res.status(400).json({message: 'please enter course name'})
         }
+
+        if(!courseDescription){
+            return res.status(401).json({message: 'please add course description'})
+        }
+
+        if(!courseDuration){
+            return res.status(401).json({message: "please add course duration"})
+        }
+        // if(!courseName || !courseDescription || !courseDuration || !courseLevel) {
+        //     return res.status(400).json({ message: 'All fields are required' });
+        // }
 
         const existingCourse = await courseModel.findOne({courseName});
         if(existingCourse) {
@@ -72,7 +83,75 @@ const HandleDeleteCourse = async (req, res) => {
     }
 }
 
+const HandleUpdateCourse = async (req, res) => {
+    try{
+const { courseId } = req.params;
+
+const { courseName, courseImage, courseDescription, courseDuration, courseLevel } = req.body;
+
+const updatedCourse = await courseModel.findByIdAndUpdate(courseId,
+    {
+        courseName,
+        courseImage,
+        courseDescription,
+        courseDuration,
+        courseLevel
+    }, 
+    {new: true}
+);
+
+if(!updatedCourse) {
+    return res.status(404).json({ message: 'Course not found' });
+}
+
+res.status(200).json({
+    message: 'Course updated successfully',
+    updatedCourse
+})
+
+
+
+    } catch(error){
+        res.status(400).json(error.message)
+    }
+}
+
+const HandleEditCourse = async (req, res) => {
+    try {
+const { courseId } = req.params
+const {courseName, courseDescription, courseLevel} = req.body;
+
+const CheckCourse = await courseModel.findById({courseId});
+
+if(!CheckCourse){
+    return res.status(404).json({message: 'Course not found'})
+}
+
+const editedCourse = new mongoose.courseModel({
+ courseName, 
+ courseDescription,
+ courseLevel
+})
+
+await editedCourse.save()
+
+
+res.status(201).json({
+    message: 'Edits Successfully',
+    editedCourse
+})
+        
+
+
+    } catch (error) {
+        res.status(404).json(error.message)
+    }
+}
+
 
 module.exports = {
-    HandleCreateCourse
+    HandleCreateCourse,
+    HandleDeleteCourse,
+    HandleUpdateCourse,
+    HandleEditCourse
 }
